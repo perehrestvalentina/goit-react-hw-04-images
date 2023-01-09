@@ -31,11 +31,12 @@ export class App extends Component {
         const images = await fetchImages(imageName, page);
 
         if (images.length === 0) {
-          this.setState(prevState => (prevState.images = []));
+          // this.setState(prevState => (prevState.images = []));
 
           toast.error(
             `no picture with name ${imageName}, check what you enter`
           );
+          this.setState({ status: 'resolved' });
           return;
         }
 
