@@ -1,105 +1,117 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 
 import Searchbar from './Searchbar';
 import ImageGallery from './ImageGallery';
-import Modal from './Modal';
+// import Modal from './Modal';
 import Loader from './Loader';
 import Button from './Button';
 import fetchImages from 'apiHelpers';
 
 import css from './App.module.css';
 
-export class App extends Component {
-  state = {
-    imageName: '',
-    images: [],
-    status: 'idle',
-    error: null,
-    largeImageURL: '',
-    imgTags: '',
-    page: 1,
-  };
+const Status = {
+  IDLE: 'idle',
+  PENDING: 'pending',
+  RESOLVED: 'resolved',
+  REJECTED: 'rejected',
+};
 
-  async componentDidUpdate(_, prevState) {
-    const { imageName, page } = this.state;
+export const App = () => {
+  const [imageName, setImageName] = useState('');
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState('');
+  const [status, setStatus] = useState(Status.IDLE);
+  const [total, setTotal] = useState(0);
+  const [largeImageURL, setlargeImageURL] = useState('');
 
-    if (prevState.imageName !== imageName || prevState.page !== page) {
-      this.setState({ status: 'pending' });
+  useEffect(
+    () => {
+      const findImages = {
+        seachImage: imageName,
+        firstPage: page,
+      };
+      if (!imageName) {
+        fetchData(findImages);
+      }
+    },
 
+    async function fetchData(findImages) {
       try {
-        const images = await fetchImages(imageName, page);
+        const responce = await fetchImages(findImages);
 
-        if (images.length === 0) {
-          // this.setState(prevState => (prevState.images = []));
-
+        if (responce.totalHits === 0) {
           toast.error(
             `no picture with name ${imageName}, check what you enter`
           );
-          this.setState({ status: 'resolved' });
+          setStatus(Status.RESOLVED);
           return;
         }
 
-        this.setState(prevState => ({
-          images: [...prevState.images, ...images],
-          status: 'resolved',
-        }));
+        setImages(prevImages => [...prevImages, ...responce.hits]);
+        setStatus(Status.REJECTED);
+        setTotal(responce.totalHits);
       } catch (error) {
         toast.error('sorry image not found');
-      } finally {
+        setStatus(Status.REJECTED);
       }
-    }
-    if (prevState.page !== page) {
-    }
-  }
+    },
+    [imageName, page]
+  );
 
-  loadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+  const loadMore = () => {
+    setPage(prevPage => prevPage + 1);
+    useState(Status.IDLE);
   };
-  closeModal = () => {
-    this.setState({ largeImageURL: '' });
+  const getFindImage = value => {
+    const filterValue = value.trim().toLowercase();
+    setPage(1);
+    setImages([]);
+    setImageName('');
+    setStatus(Status.IDLE);
+    setTotal(0);
+    setlargeImageURL('');
   };
-  formSubmit = imageName => {
-    this.setState({ imageName, page: 1, images: [] });
-  };
+  // const closeModal = () => {
+  //   setlargeImageURL({ largeImageURL: '' });
+  // };
 
-  selectedImage = (largeImageURL, imgTags) => {
-    this.setState({ largeImageURL, imgTags });
-  };
+  // const formSubmit = imageName => {
+  //   this.setState({ imageName, page: 1, images: [] });
+  // };
 
-  render() {
-    const { imageName, status, images, error, largeImageURL, imgTags } =
-      this.state;
-    return (
-      <div className={css.App}>
-        <Searchbar onSubmit={this.formSubmit} />
-        {error && toast.error('sorry, try again')}
-        {status === 'pending' && (
-          <div className={css.loading}>
-            <Loader />
-          </div>
-        )}
+  // selectedImage = (largeImageURL, imgTags) => {
+  //   this.setState({ largeImageURL, imgTags });
+  // };
 
-        {!imageName && (
-          <p className={css.looking}>What do you want to find? </p>
-        )}
-        {images.length > 0 && (
-          <>
-            <ImageGallery images={images} selectedImage={this.selectedImage} />
-            {status === 'resolved' && <Button loadMore={this.loadMore} />}
-          </>
-        )}
-        {largeImageURL && (
-          <Modal
-            largeImageURL={largeImageURL}
-            imgTags={imgTags}
-            onClose={this.closeModal}
-          >
-            <img src={largeImageURL} alt={imgTags} />
-          </Modal>
-        )}
-        <Toaster />
-      </div>
-    );
-  }
-}
+  return (
+    <div className={css.App}>
+      <Searchbar onSubmit={getFindImage} />
+      {/* {error && toast.error('sorry, try again')} */}
+      {Status.PENDING && (
+        <div className={css.loading}>
+          <Loader />
+        </div>
+      )}
+
+      {/* {!imageName && <p className={css.looking}>What do you want to find? </p>} */}
+      {images.length > 0 && (
+        <>
+          <ImageGallery images={images} />
+          {/* selectedImage={this.selectedImage} */}
+          {Status.RESOLVED && <Button loadMore={loadMore} />}
+        </>
+      )}
+      {/* {largeImageURL && (
+        <Modal
+          largeImageURL={largeImageURL}
+          imgTags={imgTags}
+          onClose={closeModal}
+        >
+          <img src={largeImageURL} alt={imgTags} />
+        </Modal>
+      )} */}
+      <Toaster />
+    </div>
+  );
+};
