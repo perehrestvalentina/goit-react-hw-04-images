@@ -16,11 +16,7 @@ export const Modal = ({ onClose, largeImageURL, keyClose, overlayClick }) => {
     };
   }, [onClose]);
 
-  // const overlayClick = e => {
-  //   if (e.target === e.currentTarget) {
-  //     onClose();
-  //   }
-  // };
+  
   return (
     <div onClick={overlayClick} className={css.Overlay}>
       <div className={css.Modal}>

@@ -32,13 +32,13 @@ export const App = () => {
         firstPage: page,
       };
       if (!imageName) {
-        fetchData(findImages);
+        fetchImages(findImages);
       }
     },
 
-    async function fetchData(findImages) {
+    function fetchData(findImages) {
       try {
-        const responce = await fetchImages(findImages);
+        const responce = fetchImages(findImages);
 
         if (responce.totalHits === 0) {
           toast.error(
@@ -61,7 +61,7 @@ export const App = () => {
 
   const loadMore = () => {
     setPage(prevPage => prevPage + 1);
-    useState(Status.IDLE);
+    setStatus(status.IDLE);
   };
   const getFindImage = value => {
     const filterValue = value.trim().toLowercase();
@@ -72,45 +72,23 @@ export const App = () => {
     setTotal(0);
     setlargeImageURL('');
   };
-  // const closeModal = () => {
-  //   setlargeImageURL({ largeImageURL: '' });
-  // };
-
-  // const formSubmit = imageName => {
-  //   this.setState({ imageName, page: 1, images: [] });
-  // };
-
-  // selectedImage = (largeImageURL, imgTags) => {
-  //   this.setState({ largeImageURL, imgTags });
-  // };
-
   return (
     <div className={css.App}>
       <Searchbar onSubmit={getFindImage} />
-      {/* {error && toast.error('sorry, try again')} */}
+
       {Status.PENDING && (
         <div className={css.loading}>
           <Loader />
         </div>
       )}
 
-      {/* {!imageName && <p className={css.looking}>What do you want to find? </p>} */}
       {images.length > 0 && (
         <>
           <ImageGallery images={images} />
-          {/* selectedImage={this.selectedImage} */}
+
           {Status.RESOLVED && <Button loadMore={loadMore} />}
         </>
       )}
-      {/* {largeImageURL && (
-        <Modal
-          largeImageURL={largeImageURL}
-          imgTags={imgTags}
-          onClose={closeModal}
-        >
-          <img src={largeImageURL} alt={imgTags} />
-        </Modal>
-      )} */}
       <Toaster />
     </div>
   );
