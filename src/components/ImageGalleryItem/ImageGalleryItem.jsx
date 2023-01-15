@@ -1,24 +1,23 @@
 import { useState } from 'react';
-import Modal from 'components/Modal';
 import PropTypes from 'prop-types';
+
+import Modal from 'components/Modal';
 import css from './ImageGalleryItem.module.css';
 
-export const ImageGalleryItem = ({
-  tags,
-  webformatURL,
-  largeImageURL,
-  selectedImage,
-}) => {
+export const ImageGalleryItem = ({ tags, webformatURL, largeImageURL }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => {
     setIsModalOpen(true);
   };
+
   const closeModalByClick = e => {
     if (e.target.nodeName !== 'IMG') {
       setIsModalOpen(false);
     }
   };
+
   const closeModalByEsc = () => setIsModalOpen(false);
+
   return (
     <li className={css.ImageGalleryItem}>
       <img

@@ -1,94 +1,74 @@
 import { useState, useEffect } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-
+import fetchImages from 'apiHelpers';
 import Searchbar from './Searchbar';
 import ImageGallery from './ImageGallery';
-// import Modal from './Modal';
 import Loader from './Loader';
 import Button from './Button';
-import fetchImages from 'apiHelpers';
-
 import css from './App.module.css';
 
-const Status = {
-  IDLE: 'idle',
-  PENDING: 'pending',
-  RESOLVED: 'resolved',
-  REJECTED: 'rejected',
-};
+const COUNTER_PAGE = 12;
 
 export const App = () => {
   const [imageName, setImageName] = useState('');
   const [images, setImages] = useState([]);
-  const [page, setPage] = useState('');
-  const [status, setStatus] = useState(Status.IDLE);
-  const [total, setTotal] = useState(0);
-  const [largeImageURL, setlargeImageURL] = useState('');
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [total, setTotal] = useState(null);
 
-  useEffect(
-    () => {
-      const findImages = {
-        seachImage: imageName,
-        firstPage: page,
-      };
-      if (!imageName) {
-        fetchImages(findImages);
-      }
-    },
+  useEffect(() => {
+    if (imageName === '') return;
 
-    function fetchData(findImages) {
+    const findImages = async () => {
       try {
-        const responce = fetchImages(findImages);
+        setIsLoading(true);
+        const response = await fetchImages(imageName, page);
+        const data = response.totalHits.map(
+          ({ id, webformatURL, largeImageURL, tags }) => {
+            return { id, webformatURL, largeImageURL, tags };
+          }
+        );
 
-        if (responce.totalHits === 0) {
+        setImages(prevImages => [...prevImages, ...data]);
+        setTotal(Math.ceil(response.totalHits / COUNTER_PAGE));
+        setIsLoading(false);
+
+        if (response.totalHits < 1)
           toast.error(
             `no picture with name ${imageName}, check what you enter`
           );
-          setStatus(Status.RESOLVED);
-          return;
-        }
-
-        setImages(prevImages => [...prevImages, ...responce.hits]);
-        setStatus(Status.REJECTED);
-        setTotal(responce.totalHits);
-      } catch (error) {
+      } catch {
         toast.error('sorry image not found');
-        setStatus(Status.REJECTED);
       }
-    },
-    [imageName, page]
-  );
+    };
+    findImages();
+  }, [imageName, page]);
 
   const loadMore = () => {
     setPage(prevPage => prevPage + 1);
-    setStatus(status.IDLE);
   };
+
   const getFindImage = value => {
-    const filterValue = value.trim().toLowercase();
-    setPage(1);
+    if (setImageName === value) {
+      toast.error('Please enter a new search query');
+      return;
+    }
+    setImageName(value);
     setImages([]);
-    setImageName('');
-    setStatus(Status.IDLE);
-    setTotal(0);
-    setlargeImageURL('');
+    setPage(1);
   };
+
   return (
     <div className={css.App}>
       <Searchbar onSubmit={getFindImage} />
+      <ImageGallery data={images} />
 
-      {Status.PENDING && (
-        <div className={css.loading}>
-          <Loader />
-        </div>
+      {images.length > COUNTER_PAGE && total !== page && !isLoading && (
+        <Button loadMore={loadMore} />
       )}
 
-      {images.length > 0 && (
-        <>
-          <ImageGallery images={images} />
+      {isLoading && <Loader />}
 
-          {Status.RESOLVED && <Button loadMore={loadMore} />}
-        </>
-      )}
       <Toaster />
     </div>
   );

@@ -2,8 +2,8 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import css from './Searchbar.module.css';
 import { BsSearch } from 'react-icons/bs';
-import toast, { Toaster } from 'react-hot-toast';
-export default function Searchbar({ onSubmit }) {
+
+const Searchbar = ({ onSubmit }) => {
   const [imageName, setImageName] = useState('');
 
   const handleNameChange = event => {
@@ -12,19 +12,7 @@ export default function Searchbar({ onSubmit }) {
 
   const onHendleSubmit = event => {
     event.preventDefault();
-
-    if (imageName.trim() === '') {
-      toast.error('Please, enter the name of the image or photo', {
-        style: {
-          background: 'grey',
-          color: '#fff',
-        },
-      });
-      return;
-    }
-
     onSubmit(imageName);
-    setImageName('');
   };
 
   return (
@@ -47,12 +35,12 @@ export default function Searchbar({ onSubmit }) {
           placeholder="Search images and photos"
         />
       </form>
-      <Toaster />
     </header>
   );
-}
+};
 
 Searchbar.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   imageName: PropTypes.string,
 };
+export default Searchbar;
