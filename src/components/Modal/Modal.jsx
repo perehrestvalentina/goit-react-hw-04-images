@@ -7,8 +7,8 @@ const Modal = ({ onClose, largeImageURL }) => {
     const keyClose = e => {
       if (e.key === 'Escape') onClose();
     };
-    document.addEventListener('keydown', keyClose);
-    return () => document.removeEventListener('keydown', keyClose);
+    window.addEventListener('keydown', keyClose);
+    return () => window.removeEventListener('keydown', keyClose);
   }, [onClose]);
 
   const overlayClick = e => {

@@ -2,22 +2,31 @@ import PropTypes from 'prop-types';
 import ImageGalleryItem from 'components/ImageGalleryItem';
 import css from './ImageGallery.module.css';
 
-const ImageGallery = ({ data }) => {
+const ImageGallery = ({ images }) => {
   return (
     <ul className={css.ImageGallery}>
-      {data.map(({ id, ...otherProps }) => {
-        return <ImageGalleryItem key={id} {...otherProps} />;
-      })}
+      {images.map(({ id, webformatURL, largeImageURL, tags }) => (
+        <ImageGalleryItem
+          key={id}
+          tags={tags}
+          webformatURL={webformatURL}
+          largeImageURL={largeImageURL}
+        />
+      ))}
     </ul>
   );
 };
 
-ImageGallery.propType = {
-  data: PropTypes.arrayOf(
+ImageGallery.propTypes = {
+  images: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number.isRequired,
-    }).isRequired
-  ).isRequired,
+      tags: PropTypes.string.isRequired,
+      webformatURL: PropTypes.string.isRequired,
+      largeImageURL: PropTypes.string.isRequired,
+      selectedImage: PropTypes.func,
+    })
+  ),
 };
 
 export default ImageGallery;

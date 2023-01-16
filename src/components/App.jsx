@@ -61,7 +61,8 @@ export const App = () => {
   return (
     <div className={css.App}>
       <Searchbar onSubmit={getFindImage} />
-      <ImageGallery data={images} />
+
+      <ImageGallery images={images} />
 
       {images.length > COUNTER_PAGE && total !== page && !isLoading && (
         <Button loadMore={loadMore} />
