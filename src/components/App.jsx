@@ -16,9 +16,11 @@ export const App = () => {
   const [imgTags, setImgTags] = useState('');
   const [largeImageURL, setLargeImageURL] = useState('');
 
-  useEffect(() => {}, [imageName, page]);
+  useEffect(() => {
+    getApi(imageName, page);
+  });
 
-  const fechApi = (findImage, numberPage) => {
+  const getApi = (findImage, numberPage) => {
     if (!findImage) return;
 
     async function imageApi() {
@@ -38,7 +40,6 @@ export const App = () => {
     }
     imageApi();
   };
-
   const loadMore = () => {
     setPage(prevPage => prevPage + 1);
   };
