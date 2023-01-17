@@ -5,66 +5,65 @@ import Searchbar from './Searchbar';
 import ImageGallery from './ImageGallery';
 import Loader from './Loader';
 import Button from './Button';
+import Modal from './Modal';
 import css from './App.module.css';
 
-const COUNTER_PAGE = 12;
-
-export const App = () => {
+export function App() {
   const [imageName, setImageName] = useState('');
-  const [images, setImages] = useState([]);
+  const [images, setImages, ges] = useState([]);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [total, setTotal] = useState(null);
+  const [largeImageURL, setLargeImageURL] = useState('');
 
   useEffect(() => {
-    if (imageName === '') return;
+    getApi(imageName, page);
+  }, [imageName, page]);
 
-    const findImages = async () => {
+  function getApi(findImage, numberPage) {
+    if (!findImage) return;
+
+    async function imageApi() {
       try {
         setIsLoading(true);
-        const response = await fetchImages(imageName, page);
-        const data = response.totalHits.map(
-          ({ id, webformatURL, largeImageURL, tags }) => {
-            return { id, webformatURL, largeImageURL, tags };
-          }
-        );
+        const getImages = await fetchImages(findImage, numberPage);
 
-        setImages(prevImages => [...prevImages, ...data]);
-        setTotal(Math.ceil(response.totalHits / COUNTER_PAGE));
+        if (findImage.trim() === '' || getImages.length === 0) {
+          return toast.error(`no picture with name ${findImage}`, {
+            icon: '🥺',
+          });
+        }
+        setImages([...images, ...getImages]);
+      } catch (error) {
+        return toast.error('we can not find');
+      } finally {
         setIsLoading(false);
-
-        if (response.totalHits < 1)
-          toast.error(
-            `no picture with name ${imageName}, check what you enter`
-          );
-      } catch {
-        toast.error('sorry image not found');
       }
-    };
-    findImages();
-  }, [imageName, page]);
+    }
+    imageApi();
+  }
 
   const loadMore = () => {
     setPage(prevPage => prevPage + 1);
   };
 
-  const getFindImage = value => {
-    if (setImageName === value) {
-      toast.error('Please enter a new search query');
-      return;
-    }
-    setImageName(value);
+  const getFindImage = imageName => {
+    setImageName(imageName);
     setImages([]);
     setPage(1);
+  };
+  const handleSelectedImage = (largeImageURL, total) => {
+    setLargeImageURL(largeImageURL);
+    setTotal(total);
   };
 
   return (
     <div className={css.App}>
-      <Searchbar onSubmit={getFindImage} />
+      <Searchbar onSubmit={getFindImage} selectedImage={handleSelectedImage} />
 
       <ImageGallery images={images} />
 
-      {images.length > COUNTER_PAGE && total !== page && !isLoading && (
+      {images.length && total !== page && !isLoading && (
         <Button loadMore={loadMore} />
       )}
 
@@ -73,4 +72,4 @@ export const App = () => {
       <Toaster />
     </div>
   );
-};
+}
