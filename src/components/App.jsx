@@ -8,7 +8,7 @@ import Button from './Button';
 import Modal from './Modal';
 import css from './App.module.css';
 
-export function App() {
+export const App = () => {
   const [imageName, setImageName] = useState('');
   const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
@@ -20,7 +20,7 @@ export function App() {
     getApi(imageName, page);
   }, [imageName, page]);
 
-  function getApi(findImage, numberPage) {
+  const getApi = (findImage, numberPage) => {
     if (!findImage) return;
 
     async function imageApi() {
@@ -39,7 +39,7 @@ export function App() {
       }
     }
     imageApi();
-  }
+  };
 
   const loadMore = () => {
     setPage(prevPage => prevPage + 1);
@@ -82,4 +82,4 @@ export function App() {
       <Toaster />
     </div>
   );
-}
+};
