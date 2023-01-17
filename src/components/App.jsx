@@ -16,11 +16,9 @@ export const App = () => {
   const [imgTags, setImgTags] = useState('');
   const [largeImageURL, setLargeImageURL] = useState('');
 
-  useEffect(() => {
-    getApi(imageName, page);
-  }, [imageName, page]);
+  useEffect(() => {}, [imageName, page]);
 
-  const getApi = (findImage, numberPage) => {
+  const fechApi = (findImage, numberPage) => {
     if (!findImage) return;
 
     async function imageApi() {
