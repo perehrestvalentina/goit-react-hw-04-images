@@ -10,10 +10,10 @@ import css from './App.module.css';
 
 export function App() {
   const [imageName, setImageName] = useState('');
-  const [images, setImages, ges] = useState([]);
+  const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [total, setTotal] = useState(null);
+  const [imgTags, setImgTags] = useState('');
   const [largeImageURL, setLargeImageURL] = useState('');
 
   useEffect(() => {
@@ -29,9 +29,7 @@ export function App() {
         const getImages = await fetchImages(findImage, numberPage);
 
         if (findImage.trim() === '' || getImages.length === 0) {
-          return toast.error(`no picture with name ${findImage}`, {
-            icon: '🥺',
-          });
+          return toast.error(`no picture with name ${findImage}`);
         }
         setImages([...images, ...getImages]);
       } catch (error) {
@@ -52,23 +50,35 @@ export function App() {
     setImages([]);
     setPage(1);
   };
-  const handleSelectedImage = (largeImageURL, total) => {
+  const handleSelectedImage = (largeImageURL, imgTags) => {
     setLargeImageURL(largeImageURL);
-    setTotal(total);
+    setImgTags(imgTags);
   };
-
   return (
     <div className={css.App}>
-      <Searchbar onSubmit={getFindImage} selectedImage={handleSelectedImage} />
-
-      <ImageGallery images={images} />
-
-      {images.length && total !== page && !isLoading && (
-        <Button loadMore={loadMore} />
+      <Searchbar onSubmit={getFindImage} />
+      {isLoading && (
+        <div className={css.loading}>
+          <Loader />
+        </div>
       )}
 
-      {isLoading && <Loader />}
-
+      {!imageName && <p className={css.looking}>What do you want to find? </p>}
+      {images.length > 0 && (
+        <>
+          <ImageGallery images={images} selectedImage={handleSelectedImage} />
+          <Button loadMore={loadMore} />
+        </>
+      )}
+      {largeImageURL && (
+        <Modal
+          largeImageURL={largeImageURL}
+          imgTags={imgTags}
+          onClose={() => setLargeImageURL('')}
+        >
+          <img src={largeImageURL} alt={imgTags} />
+        </Modal>
+      )}
       <Toaster />
     </div>
   );
